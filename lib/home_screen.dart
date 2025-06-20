@@ -1,218 +1,63 @@
 import 'package:flutter/material.dart';
+import 'package:tb_mobile/authors_space_page.dart';
+import 'package:tb_mobile/for_you_page.dart';
+import 'package:tb_mobile/headlines_page.dart';
+import 'package:tb_mobile/search_page.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+
+  int _currentIndex = 0;
+
+  final List<Widget> _pages = [
+    ForYouPage(),
+    HeadlinesPage(),
+    AuthorsSpacePage(),
+  ];
+  
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        leading: IconButton(icon: const Icon(Icons.menu), onPressed: () {}),
+        backgroundColor: Colors.white,
         title: const Text("For you"),
         centerTitle: false,
         actions: [
-          IconButton(icon: const Icon(Icons.search), onPressed: () {}),
-          const CircleAvatar(
-            backgroundImage: AssetImage('assets/images/profile.png'),
-            radius: 16,
-          ),
+          IconButton(icon: const Icon(Icons.search), onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => SearchPage()),
+          );
+        }),
           const SizedBox(width: 12),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          const Text(
-            "Monday, September 12",
-            style: TextStyle(color: Colors.grey),
-          ),
-          const SizedBox(height: 16),
-
-          // --- Top Stories ---
-          _sectionHeader("Top Stories"),
-          const SizedBox(height: 12),
-          _topStoryCard(),
-
-          const SizedBox(height: 24),
-
-          // --- Highlights ---
-          _sectionHeader("Highlights"),
-          const SizedBox(height: 12),
-          _highlightList(),
-
-          const SizedBox(height: 24),
-
-          // --- Trending ---
-          _sectionHeader("🔥 Trending"),
-          const SizedBox(height: 12),
-          _trendingCard(),
-          _trendingCard(),
-
-          const SizedBox(height: 24),
-
-          // --- News List ---
-          _newsItem(),
-          _newsItem(),
-          _newsItem(),
-
-          const SizedBox(height: 16),
-          _readMoreButton(),
-          const SizedBox(height: 16),
-          const Center(child: CircularProgressIndicator()),
-        ],
-      ),
+      body: _pages[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 0,
-        selectedItemColor: Colors.orange,
+        currentIndex: _currentIndex,
+        selectedItemColor: Colors.blue,
         unselectedItemColor: Colors.grey,
+        backgroundColor: Colors.white,
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.explore), label: "For You"),
-          BottomNavigationBarItem(icon: Icon(Icons.public), label: "Headlines"),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bookmark),
-            label: "Bookmark",
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "For You"),
+          BottomNavigationBarItem(icon: Icon(Icons.explore), label: "Headlines"),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Author's Space"),
         ],
       ),
     );
   }
 
-  Widget _sectionHeader(String title) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        const Text("See all", style: TextStyle(color: Colors.orange)),
-      ],
-    );
-  }
-
-  Widget _topStoryCard() {
-    return Card(
-      elevation: 2,
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Image.asset("assets/images/top_story.jpg", fit: BoxFit.cover),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Text("sometechjournal.co", style: TextStyle(fontSize: 12)),
-                SizedBox(height: 4),
-                Text(
-                  "Tech giant announces major investment in renewable energy",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 4),
-                Text("3h ago", style: TextStyle(color: Colors.grey)),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _highlightList() {
-    return SizedBox(
-      height: 160,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        children: [
-          _highlightItem("Stock market surges", "assets/images/top_story.jpg"),
-          _highlightItem("Olympic gold medals", "assets/images/top_story.jpg"),
-          _highlightItem("STEM competition", "assets/images/top_story.jpg"),
-        ],
-      ),
-    );
-  }
-
-  Widget _highlightItem(String title, String imagePath) {
-    return Container(
-      width: 140,
-      margin: const EdgeInsets.only(right: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.asset(imagePath, height: 90, fit: BoxFit.cover),
-          ),
-          const SizedBox(height: 6),
-          Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-          const Text(
-            "2h ago",
-            style: TextStyle(color: Colors.grey, fontSize: 12),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _trendingCard() {
-    return Card(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Image.asset("assets/images/top_story.jpg", fit: BoxFit.cover),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Text("#GlobalCup", style: TextStyle(color: Colors.orange)),
-                SizedBox(height: 4),
-                Text(
-                  "Underdog team shocks the world with stunning victory",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                Text("5h ago", style: TextStyle(color: Colors.grey)),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _newsItem() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text("scholarrandom.co", style: TextStyle(fontSize: 12)),
-        const SizedBox(height: 4),
-        const Text(
-          "College admissions process faces reform amid scandals",
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        const Text(
-          "In the wake of several high-profile admissions scandals that have rocked the nation...",
-          style: TextStyle(color: Colors.grey),
-        ),
-        const SizedBox(height: 12),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: Image.asset("assets/images/top_story.jpg"),
-        ),
-        const SizedBox(height: 16),
-      ],
-    );
-  }
-
-  Widget _readMoreButton() {
-    return Center(
-      child: OutlinedButton.icon(
-        onPressed: () {},
-        icon: const Icon(Icons.arrow_forward),
-        label: const Text("Read full coverage"),
-      ),
-    );
-  }
+  
 }
