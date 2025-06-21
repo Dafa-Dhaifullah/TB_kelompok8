@@ -13,7 +13,7 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     Timer(const Duration(seconds: 3), () {
-      Navigator.pushReplacementNamed(context, '/signin');
+      Navigator.pushReplacementNamed(context, '/home');
     });
   }
 
@@ -28,7 +28,7 @@ class _SplashScreenState extends State<SplashScreen> {
             Image.asset('assets/images/news_icon.jpg', width: 100, height: 100),
             const SizedBox(height: 20),
             const Text(
-              "The Essential News",
+              "Core News",
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -13,9 +15,16 @@ class _SignInScreenState extends State<SignInScreen> {
   bool _isObscure = true;
 
   @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F4F4),
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(20),
@@ -32,21 +41,8 @@ class _SignInScreenState extends State<SignInScreen> {
                 ),
                 const SizedBox(height: 10),
                 const Center(
-                  child: Text.rich(
-                    TextSpan(
-                      text: 'By continuing, you agree to our ',
-                      children: [
-                        TextSpan(
-                          text: 'Terms of Services',
-                          style: TextStyle(color: Colors.blue),
-                        ),
-                        TextSpan(text: ' and '),
-                        TextSpan(
-                          text: 'Private Policy.',
-                          style: TextStyle(color: Colors.blue),
-                        ),
-                      ],
-                    ),
+                  child: Text(
+                    'If you are author, you could Sign In',
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -100,55 +96,59 @@ class _SignInScreenState extends State<SignInScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 10),
-                const Align(
-                  alignment: Alignment.centerRight,
-                  child: Text(
-                    "Forgot Password ?",
-                    style: TextStyle(color: Colors.red),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushReplacementNamed(context, '/home');
-                      // Tambahkan logika autentikasi di sini
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: const Text(
-                      "Sign in",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Center(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text("Don't have an account ? "),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.pushNamed(context, '/signup');
-                        },
-                        child: const Text(
-                          "Sign Up",
-                          style: TextStyle(color: Colors.blue),
+                const SizedBox(height: 30),
+                Consumer<AuthProvider>(
+                  builder: (context, authProvider, _) {
+                    return Column(
+                      children: [
+                        // Error message
+                        if (authProvider.error != null)
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(12),
+                            margin: const EdgeInsets.only(bottom: 16),
+                            decoration: BoxDecoration(
+                              color: Colors.red[50],
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.red[200]!),
+                            ),
+                            child: Text(
+                              authProvider.error!,
+                              style: const TextStyle(
+                                color: Colors.red,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        
+                        // Sign In Button
+                        SizedBox(
+                          width: double.infinity,
+                          height: 48,
+                          child: ElevatedButton(
+                            onPressed: authProvider.isLoading ? null : _signIn,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blue,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: authProvider.isLoading
+                                ? const CircularProgressIndicator(
+                                    color: Colors.white,
+                                  )
+                                : const Text(
+                                    "Sign In",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    );
+                  },
                 ),
               ],
             ),
@@ -156,5 +156,34 @@ class _SignInScreenState extends State<SignInScreen> {
         ),
       ),
     );
+  }
+
+  void _signIn() async {
+    // Validate input
+    if (emailController.text.trim().isEmpty || passwordController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please fill in both email and password'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    
+    // Clear previous errors
+    authProvider.clearError();
+    
+    final success = await authProvider.login(
+      emailController.text.trim(),
+      passwordController.text.trim(),
+    );
+
+    if (success && mounted) {
+      // Login successful, navigate to home or refresh current page
+      Navigator.pushReplacementNamed(context, '/home');
+    }
+    // Error handling is done in the provider and shown in UI
   }
 }
