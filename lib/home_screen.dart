@@ -18,7 +18,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<Widget> _pages = [
     ForYouPage(),
     HeadlinesPage(),
-    AuthorsSpacePage(),
+    AuthorPage(),
   ];
   
   @override
@@ -27,17 +27,28 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: const Text("For you"),
+        title: Text(
+          _currentIndex == 0
+              ? "For you"
+              : _currentIndex == 1
+                  ? "Headlines"
+                  : "Author's Space",
+        ),
         centerTitle: false,
-        actions: [
-          IconButton(icon: const Icon(Icons.search), onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => SearchPage()),
-          );
-        }),
-          const SizedBox(width: 12),
-        ],
+        actions: _currentIndex == 0 || _currentIndex == 1
+            ? [
+                IconButton(
+                  icon: const Icon(Icons.search),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => SearchPage()),
+                    );
+                  },
+                ),
+                const SizedBox(width: 12),
+              ]
+            : null,
       ),
       body: _pages[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
