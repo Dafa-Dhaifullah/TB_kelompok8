@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:tb_mobile/providers/news_provider.dart';
 import 'package:tb_mobile/utils/time_helper.dart';
 
+
 // Halaman Detail Berita
 class NewsDetailPage extends StatelessWidget {
   final dynamic news;
@@ -482,6 +483,7 @@ class _TrendingListState extends State<TrendingList> {
   }
 }
 
+
 class ForYouPage extends StatefulWidget {
   const ForYouPage({super.key});
 
@@ -551,6 +553,7 @@ class _ForYouPageState extends State<ForYouPage> {
             },
           ),
 
+
           const SizedBox(height: 24),
 
           // --- Trending ---
@@ -583,6 +586,7 @@ class _ForYouPageState extends State<ForYouPage> {
       ),
     );
   }
+
 
   Widget _sectionHeader(String title) {
     return Row(

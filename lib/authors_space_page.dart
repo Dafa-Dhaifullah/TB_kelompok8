@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:tb_mobile/providers/auth_provider.dart';
@@ -654,6 +653,24 @@ class _AuthorPageState extends State<AuthorPage> {
           },
         ),
       ],
+    );
+  }
+
+class AuthorsSpacePage extends StatefulWidget {
+  const AuthorsSpacePage({super.key});
+
+  @override
+  State<AuthorsSpacePage> createState() => _AuthorsSpacePageState();
+}
+
+class _AuthorsSpacePageState extends State<AuthorsSpacePage> {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text(
+        "Author's Space",
+        style: TextStyle(fontSize: 24),
+      ),
     );
   }
 }

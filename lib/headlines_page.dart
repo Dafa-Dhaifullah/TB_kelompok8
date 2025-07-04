@@ -4,6 +4,7 @@ import 'package:tb_mobile/model/news_items_model.dart';
 import 'package:tb_mobile/providers/news_provider.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
+
 // Halaman Detail Berita (sama seperti sebelumnya)
 class NewsDetailPage extends StatelessWidget {
   final NewsItem news;
@@ -209,6 +210,7 @@ class _HeadlinesPageState extends State<HeadlinesPage> {
 
         return Scaffold(
           backgroundColor: Colors.white,
+          appBar: AppBar(title: Text('Headlines')),
           body: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -274,6 +276,7 @@ class _HeadlinesPageState extends State<HeadlinesPage> {
           ),
         ),
 )
+
             ],
           ),
         );
@@ -554,3 +557,4 @@ class RegularNewsCard extends StatelessWidget {
     );
   }
 }
+
