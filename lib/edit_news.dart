@@ -299,10 +299,16 @@ class _EditNewsScreenState extends State<EditNewsScreen> {
     );
 
     final success = await newsProvider.updateNews(
-      widget.news.id,
-      updatedNews,
       authProvider.token!,
+      widget.news.id,
+      title: updatedNews.title,
+      summary: updatedNews.summary,
+      content: updatedNews.content,
+      category: updatedNews.category,
+      imageUrl: updatedNews.featuredImageUrl,
     );
+
+
 
     if (mounted) {
       setState(() {
