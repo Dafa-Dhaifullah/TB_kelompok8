@@ -1,5 +1,6 @@
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:tb_mobile/edit_news.dart';
 import 'package:tb_mobile/providers/auth_provider.dart';
 import 'package:tb_mobile/providers/news_provider.dart';
 import 'package:tb_mobile/signin_screen.dart';
@@ -8,7 +9,7 @@ import 'package:tb_mobile/read_news.dart';
 import 'package:tb_mobile/model/news.dart';
 
 // News Detail Page untuk Author (mengadaptasi dari NewsDetailPage)
-class AuthorNewsDetailPage extends StatelessWidget {
+class AuthorNewsDetailPage extends StatefulWidget {
   final News news;
   final bool isAuthor;
 
@@ -18,6 +19,11 @@ class AuthorNewsDetailPage extends StatelessWidget {
     this.isAuthor = true,
   });
 
+  @override
+  State<AuthorNewsDetailPage> createState() => _AuthorNewsDetailPageState();
+}
+
+class _AuthorNewsDetailPageState extends State<AuthorNewsDetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,14 +36,21 @@ class AuthorNewsDetailPage extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
-          if (isAuthor) ...[
+          if (widget.isAuthor) ...[
             IconButton(
               icon: const Icon(Icons.edit, color: Colors.black),
-              onPressed: () {
-                // Navigate to edit news screen
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Edit functionality coming soon')),
+              onPressed: () async {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => EditNewsScreen(news: widget.news),
+                  ),
                 );
+                
+                // Jika edit berhasil, kembali ke halaman sebelumnya dan refresh
+                if (result == true) {
+                  Navigator.pop(context, true);
+                }
               },
             ),
             IconButton(
@@ -64,7 +77,7 @@ class AuthorNewsDetailPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Status badge (jika author)
-            if (isAuthor) ...[
+            if (widget.isAuthor) ...[
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
@@ -85,7 +98,7 @@ class AuthorNewsDetailPage extends StatelessWidget {
             
             // Judul
             Text(
-              news.title,
+              widget.news.title,
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -98,18 +111,18 @@ class AuthorNewsDetailPage extends StatelessWidget {
             Row(
               children: [
                 Text(
-                  DateFormat('MMM d, yyyy').format(news.updatedAt),
+                  DateFormat('MMM d, yyyy').format(widget.news.updatedAt),
                   style: const TextStyle(
                     fontSize: 14,
                     color: Colors.grey,
                   ),
                 ),
-                if (news.viewCount != null) ...[
+                if (widget.news.viewCount != null) ...[
                   const SizedBox(width: 16),
                   Icon(Icons.visibility, size: 16, color: Colors.grey),
                   const SizedBox(width: 4),
                   Text(
-                    '${news.viewCount} views',
+                    '${widget.news.viewCount} views',
                     style: const TextStyle(
                       fontSize: 14,
                       color: Colors.grey,
@@ -121,11 +134,11 @@ class AuthorNewsDetailPage extends StatelessWidget {
             const SizedBox(height: 20),
             
             // Gambar utama
-            if (news.featuredImageUrl != null)
+            if (widget.news.featuredImageUrl != null)
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: Image.network(
-                  news.featuredImageUrl!,
+                  widget.news.featuredImageUrl!,
                   width: double.infinity,
                   height: 250,
                   fit: BoxFit.cover,
@@ -141,9 +154,9 @@ class AuthorNewsDetailPage extends StatelessWidget {
             const SizedBox(height: 20),
             
             // Summary
-            if (news.summary != null && news.summary!.isNotEmpty) ...[
+            if (widget.news.summary != null && widget.news.summary!.isNotEmpty) ...[
               Text(
-                news.summary!,
+                widget.news.summary!,
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w500,
@@ -155,9 +168,9 @@ class AuthorNewsDetailPage extends StatelessWidget {
             ],
             
             // Content
-            if (news.content != null && news.content!.isNotEmpty) ...[
+            if (widget.news.content != null && widget.news.content!.isNotEmpty) ...[
               Text(
-                news.content!,
+                widget.news.content!,
                 style: const TextStyle(
                   fontSize: 16,
                   height: 1.6,
@@ -186,7 +199,7 @@ class AuthorNewsDetailPage extends StatelessWidget {
             const SizedBox(height: 30),
             
             // Category
-            if (news.category != null) ...[
+            if (widget.news.category != null) ...[
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
@@ -194,7 +207,7 @@ class AuthorNewsDetailPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  news.category!,
+                  widget.news.category!,
                   style: const TextStyle(
                     color: Colors.blue,
                     fontWeight: FontWeight.w500,
@@ -208,33 +221,79 @@ class AuthorNewsDetailPage extends StatelessWidget {
     );
   }
 
+  // void _showDeleteConfirmation(BuildContext context) {
   void _showDeleteConfirmation(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Delete Article'),
+        content: const Text(
+          'Are you sure you want to delete this article? This action cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.of(context).pop(); // Close dialog
+              await _deleteNews(context);
+            },
+            child: const Text(
+              'Delete', 
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+Future<void> _deleteNews(BuildContext context) async {
+  try {
+    // Show loading
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Delete Article'),
-          content: const Text('Are you sure you want to delete this article?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                // Implement delete functionality
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Delete functionality coming soon')),
-                );
-              },
-              child: const Text('Delete', style: TextStyle(color: Colors.red)),
-            ),
-          ],
-        );
-      },
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
+      ),
     );
+
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final newsProvider = Provider.of<NewsProvider>(context, listen: false);
+
+    // Call delete API
+    await newsProvider.deleteNews(
+      authProvider.token!,
+      widget.news.id, // atau news.slug
+    );
+
+    if (mounted) {
+      Navigator.pop(context); // Close loading dialog
+      Navigator.pop(context, true); // Return to previous page dengan success flag
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Article deleted successfully'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
+  } catch (e) {
+    if (mounted) {
+      Navigator.pop(context); // Close loading dialog
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error deleting article: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
+}
 }
 
 // Author News Card (mengadaptasi dari RegularNewsCard)
@@ -249,9 +308,9 @@ class AuthorNewsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
+      onTap: () async {
         print("Slug yang dikirim: ${news.slug}");
-        Navigator.push(
+        final result = await Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => AuthorNewsDetailPage(
@@ -260,6 +319,15 @@ class AuthorNewsCard extends StatelessWidget {
             ),
           ),
         );
+        
+        // Jika ada perubahan (edit/delete), refresh list
+        if (result == true) {
+          // Trigger refresh dari parent
+          // Bisa menggunakan callback atau provider
+          final newsProvider = Provider.of<NewsProvider>(context, listen: false);
+          final authProvider = Provider.of<AuthProvider>(context, listen: false);
+          newsProvider.getAuthorNews(authProvider.token!);
+        }
       },
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 6),

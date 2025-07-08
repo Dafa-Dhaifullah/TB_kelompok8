@@ -8,6 +8,8 @@ import 'package:tb_mobile/services/api_service.dart';
 
 
 class NewsProvider with ChangeNotifier {
+  final String baseUrl = 'http://45.149.187.204:3000/api';
+
   List<NewsItem> _newsList = [];
 
   List<NewsItem> get newsList => _newsList;
@@ -113,61 +115,61 @@ class NewsProvider with ChangeNotifier {
   }
 
   // Update news
-  Future<bool> updateNews(String id, News news, String token) async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
+  // Future<bool> updateNews(String id, News news, String token) async {
+  //   _isLoading = true;
+  //   _error = null;
+  //   notifyListeners();
 
-    try {
-      final response = await ApiService.updateNews(id, news, token);
-      if (response.success) {
-        final index = _authorNews.indexWhere((n) => n.id == id);
-        if (index != -1) {
-          _authorNews[index] = response.data!;
-        }
-        _isLoading = false;
-        notifyListeners();
-        return true;
-      } else {
-        _error = response.message;
-        _isLoading = false;
-        notifyListeners();
-        return false;
-      }
-    } catch (e) {
-      _error = e.toString();
-      _isLoading = false;
-      notifyListeners();
-      return false;
-    }
-  }
+  //   try {
+  //     final response = await ApiService.updateNews(id, news, token);
+  //     if (response.success) {
+  //       final index = _authorNews.indexWhere((n) => n.id == id);
+  //       if (index != -1) {
+  //         _authorNews[index] = response.data!;
+  //       }
+  //       _isLoading = false;
+  //       notifyListeners();
+  //       return true;
+  //     } else {
+  //       _error = response.message;
+  //       _isLoading = false;
+  //       notifyListeners();
+  //       return false;
+  //     }
+  //   } catch (e) {
+  //     _error = e.toString();
+  //     _isLoading = false;
+  //     notifyListeners();
+  //     return false;
+  //   }
+  // }
 
   // Delete news
-  Future<bool> deleteNews(String id, String token) async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
+  // Future<bool> deleteNews(String id, String token) async {
+  //   _isLoading = true;
+  //   _error = null;
+  //   notifyListeners();
 
-    try {
-      final response = await ApiService.deleteNews(id, token);
-      if (response.success) {
-        _authorNews.removeWhere((news) => news.id == id);
-        _isLoading = false;
-        notifyListeners();
-        return true;
-      } else {
-        _error = response.message;
-        _isLoading = false;
-        notifyListeners();
-        return false;
-      }
-    } catch (e) {
-      _error = e.toString();
-      _isLoading = false;
-      notifyListeners();
-      return false;
-    }
-  }
+  //   try {
+  //     final response = await ApiService.deleteNews(id, token);
+  //     if (response.success) {
+  //       _authorNews.removeWhere((news) => news.id == id);
+  //       _isLoading = false;
+  //       notifyListeners();
+  //       return true;
+  //     } else {
+  //       _error = response.message;
+  //       _isLoading = false;
+  //       notifyListeners();
+  //       return false;
+  //     }
+  //   } catch (e) {
+  //     _error = e.toString();
+  //     _isLoading = false;
+  //     notifyListeners();
+  //     return false;
+  //   }
+  // }
 
   void clearError() {
     _error = null;
@@ -177,5 +179,66 @@ class NewsProvider with ChangeNotifier {
   void clearSelectedNews() {
     _selectedNews = null;
     notifyListeners();
+  }
+  Future<bool> updateNews(
+    String token,
+    String newsId,
+    {
+      required String title,
+      String? summary,
+      String? content,
+      String? category,
+      String? imageUrl,
+    }
+  ) async {
+    try {
+      final response = await http.put(
+        Uri.parse('$baseUrl/author/news/$newsId'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'title': title,
+          'summary': summary,
+          'content': content,
+          'category': category,
+          'featured_image_url': imageUrl,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        // Refresh author news setelah update
+        await getAuthorNews(token);
+      } else {
+        throw Exception('Failed to update news');
+      }
+    } catch (e) {
+      throw Exception('Error updating news: $e');
+    }
+    return false;
+  }
+
+  Future<bool> deleteNews(String token, String newsId) async {
+    try {
+      final response = await http.delete(
+        Uri.parse('$baseUrl/author/news/$newsId'),
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        // Remove from local list
+        _authorNews.removeWhere((news) => news.id == newsId);
+        notifyListeners();
+      } else {
+        throw Exception('Failed to delete news');
+      }
+    } catch (e) {
+      throw Exception('Error deleting news: $e');
+    }
+
+    return false;
   }
 }
